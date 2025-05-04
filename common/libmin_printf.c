@@ -1,6 +1,7 @@
 #include "libmin.h"
 #include "libtarg.h"
 
+#define LIBMIN_NO_FLOAT 1
 /*
  * Copyright Patrick Powell 1995
  * This code is based on code written by Patrick Powell (papowell@astart.com)
@@ -293,6 +294,8 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
 	  value = (long)va_arg (args, unsigned int);
 	fmtint (buffer, &currlen, maxlen, value, 16, min, max, flags);
 	break;
+  #ifndef LIBMIN_NO_FLOAT
+
       case 'f':
 	if (cflags == DP_C_LDOUBLE)
 	  fvalue = va_arg (args, LDOUBLE);
@@ -317,6 +320,24 @@ dopr(char *buffer, size_t maxlen, const char *format, va_list args)
 	else
 	  fvalue = va_arg (args, double);
 	break;
+
+  #else
+
+      case 'f':
+      case 'E':
+      case 'e':
+      case 'G':
+      case 'g':
+      if (cflags == DP_C_LDOUBLE)
+      va_arg(args, long double);  // Consume the double from va_list
+    else
+      va_arg(args, double);       // Consume the double from va_list
+    
+    // Print alternative string
+    fmtstr(buffer, &currlen, maxlen, "<nofloat>", flags, min, max);
+    break;
+  break;
+  #endif
       case 'c':
 	dopr_outch (buffer, &currlen, maxlen, va_arg (args, int));
 	break;
