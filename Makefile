@@ -87,9 +87,9 @@ TARGET_CLEAN = *.d ibex_simple_system_pcount.csv
 TARGET_EXCLUDES = anagram c-interp checkers lz-compress rho-factor rsa-cipher spelt2num
 TARGET_REFEXT = hash
 else ifeq ($(TARGET), simple)
-TARGET_CC = riscv32-unknown-elf-gcc
+TARGET_CC = /home/ruijie/.local/share/lowrisc-toolchain-rv32imcb/bin/riscv32-unknown-elf-gcc
 #TARGET_CC = riscv32-unknown-elf-clang
-TARGET_AR = riscv32-unknown-elf-ar
+TARGET_AR = /home/ruijie/.local/share/lowrisc-toolchain-rv32imcb/bin/riscv32-unknown-elf-ar
 TARGET_CFLAGS = -DTARGET_SIMPLE -march=rv32imc_zicsr -mabi=ilp32 -static -mcmodel=medlow -Wall -g -Os -fvisibility=hidden -nostdlib -nostartfiles -ffreestanding # -MMD -mcmodel=medany
 TARGET_LIBS = -lgcc
 TARGET_SIM = ../target/simple_sim.sh /home/ruijie/Projects/ibex/build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system

@@ -14,3 +14,5 @@ FOO
 *.log
 ibex_simple_system_pcount.csv
 target/simple_mmio_plugin.so
+mult_ops_binary.csv
+pattern_analysis_results.txt
