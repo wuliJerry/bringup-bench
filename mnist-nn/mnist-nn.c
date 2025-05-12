@@ -10,7 +10,8 @@
  */
 
 #include "libmin.h"
-#include <stdio.h> // Included for host file loading. Remove if not using ENABLE_HOST_FILE_LOADING
+#include "soft_float_ops.h"
+#include <stdio.h>
 
 //================ CONFIGURATION ================
 // Network architecture
@@ -31,7 +32,7 @@
   1.0 // Common factor for Xavier/Glorot. Can be 1.0 or 2.0.
 
 // Data type used throughout the network
-typedef double DTYPE;
+// typedef double DTYPE;
 
 // MNIST Data Files
 #define TRAIN_IMAGES_FILE "train-images.idx3-ubyte"
@@ -40,7 +41,7 @@ typedef double DTYPE;
 #define TEST_LABELS_FILE "t10k-labels.idx1-ubyte"
 
 // Number of MNIST samples to load
-#define NUM_TRAIN_SAMPLES_TO_LOAD 60000 // Max 60000 for full training set
+#define NUM_TRAIN_SAMPLES_TO_LOAD 10000 // Max 60000 for full training set
 #define NUM_TEST_SAMPLES_TO_LOAD 10000  // Max 10000 for full test set
 
 // Enable this macro to use standard C file I/O for loading MNIST on a host
@@ -62,9 +63,9 @@ int num_actual_test_samples_loaded = 0;
 
 //================ UTILITY FUNCTIONS ================
 
-inline DTYPE relu(DTYPE x) { return x > 0 ? x : 0; }
+static inline DTYPE relu(DTYPE x) { return x > 0 ? x : 0; }
 
-inline DTYPE relu_derivative(DTYPE x) { return x > 0 ? 1 : 0; }
+static inline DTYPE relu_derivative(DTYPE x) { return x > 0 ? 1 : 0; }
 
 void softmax(DTYPE *input, DTYPE *output, int size) {
   if (size <= 0)
@@ -274,18 +275,37 @@ void generate_dropout_mask(NeuralNetwork *network) {
 void forward(NeuralNetwork *network, DTYPE *input) {
   for (int j = 0; j < HIDDEN_SIZE; j++) {
     DTYPE sum = network->hidden_biases[j];
-    for (int i = 0; i < INPUT_SIZE; i++)
-      sum += input[i] * network->hidden_weights[i * HIDDEN_SIZE + j];
+    for (int i = 0; i < INPUT_SIZE; i++) {
+      if (network->training_mode) {
+        sum += input[i] * network->hidden_weights[i * HIDDEN_SIZE + j];
+      } else {
+        float term = soft_float_mul32(
+            (float)input[i],
+            (float)network->hidden_weights[i * HIDDEN_SIZE + j]);
+        sum += (DTYPE)term;
+      }
+    }
     network->hidden_z[j] = sum;
     network->hidden_activations[j] = relu(sum);
-    if (network->training_mode)
+
+    if (network->training_mode) {
       network->hidden_activations[j] *= network->hidden_dropout_mask[j];
+    }
   }
+
   for (int j = 0; j < OUTPUT_SIZE; j++) {
     DTYPE sum = network->output_biases[j];
-    for (int i = 0; i < HIDDEN_SIZE; i++)
-      sum += network->hidden_activations[i] *
-             network->output_weights[i * OUTPUT_SIZE + j];
+    for (int i = 0; i < HIDDEN_SIZE; i++) {
+      if (network->training_mode) {
+        sum += network->hidden_activations[i] *
+               network->output_weights[i * OUTPUT_SIZE + j];
+      } else {
+        float term = soft_float_mul32(
+            (float)network->hidden_activations[i],
+            (float)network->output_weights[i * OUTPUT_SIZE + j]);
+        sum += (DTYPE)term;
+      }
+    }
     network->output_z[j] = sum;
   }
   softmax(network->output_z, network->output_activations, OUTPUT_SIZE);
@@ -881,6 +901,8 @@ int main(void) {
   train_nn_on_mnist(&network, MAX_EPOCHS);
 
   evaluate_nn_on_mnist_test_set(&network);
+
+  print_soft_float_stats();
 
   free_network(&network);
   libmin_printf("Network freed. Execution complete.\n");
