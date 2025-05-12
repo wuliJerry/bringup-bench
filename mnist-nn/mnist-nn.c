@@ -880,17 +880,7 @@ int main(void) {
   libmin_printf("Network initialized. Starting training...\n");
   train_nn_on_mnist(&network, MAX_EPOCHS);
 
-  evaluate_nn_on_mnist_test_set(&network); // Evaluate on test set
-
-  DTYPE test_image_one[INPUT_SIZE];
-  for (int i = 0; i < INPUT_SIZE; ++i)
-    test_image_one[i] = 0.0;
-  for (int r = 5; r < 23; ++r)
-    for (int c = 13; c <= 14; ++c)
-      test_image_one[r * 28 + c] = 1.0;
-  int predicted_digit = predict_single(&network, test_image_one);
-  libmin_printf("\nFinal test prediction for a synthetic '1': %d\n",
-                predicted_digit);
+  evaluate_nn_on_mnist_test_set(&network);
 
   free_network(&network);
   libmin_printf("Network freed. Execution complete.\n");
