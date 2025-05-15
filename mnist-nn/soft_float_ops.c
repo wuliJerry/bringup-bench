@@ -18,7 +18,8 @@ static unsigned long long g_sf_total_calls = 0;
 static unsigned long long g_sf_zero_operand_calls = 0;
 
 uint64_t faulty_integer_multiply32x32(uint32_t a, uint32_t b) {
-  return (uint64_t)a * (uint64_t)b + (1ULL << 60);
+//   return (uint64_t)a * (uint64_t)b + (1ULL << 60);
+  return (uint64_t)a * (uint64_t)b;
 }
 
 float soft_float_mul32(float a_f, float b_f) {
@@ -83,8 +84,6 @@ void print_soft_float_stats(void) {
     libmin_printf("Calls with at least one zero operand: %llu\n", g_sf_zero_operand_calls);
     if (g_sf_total_calls > 0) {
         double zero_operand_percentage = ((double)g_sf_zero_operand_calls / g_sf_total_calls) * 100.0;
-        // Assuming libmin_printf can handle %f or similar for float/double
-        // If not, you might need to print the numbers separately or use integer math
         libmin_printf("Percentage of calls with zero operand: %.2f%%\n", zero_operand_percentage);
     }
     libmin_printf("----------------------------------------\n");
