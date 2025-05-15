@@ -1,21 +1,11 @@
-/*
- ============================================================================
- Name        : EnhancedNN_MNIST.c
- Author      : Claude (based on Darius Malysiak's original, with MNIST
- integration and evaluation) Version     : 1.2 Description : Enhanced Neural
- Network implementation with variability, dropout, and proper weight
- initialization, integrated with MNIST dataset, including training and test set
- evaluation.
- ============================================================================
- */
-
 #include "libmin.h"
 #include <stdio.h> // Included for host file loading. Remove if not using ENABLE_HOST_FILE_LOADING
+#include <stdint.h>
 
 //================ CONFIGURATION ================
 // Network architecture
 #define INPUT_SIZE 784     // 28x28 pixel images for MNIST
-#define HIDDEN_SIZE 128    // Size of hidden layer
+#define HIDDEN_SIZE 300    // Size of hidden layer
 #define OUTPUT_SIZE 10     // 10 digits (0-9) for MNIST
 #define MINI_BATCH_SIZE 32 // Mini-batch size for SGD
 
